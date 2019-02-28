@@ -14,7 +14,8 @@ queries = [
 	'select no_inventaris, nama, jenis from;',
 	'select no_inventaris, nama, jenis from dirawat;',
 	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
-	# 'select p.nama, f.nama from pegawai p join dirawat r using no_ktp join fasilitas f using no_inventaris;',
+	'select * from pegawai,fasilitas;',
+	'select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);',
 ]
 
 def check(query, tables):
@@ -36,6 +37,13 @@ def check(query, tables):
 		print((False, 'syntax error'))
 
 def checkCol(col, tabs, tables):
+	dotIdx = col.find('.')
+	if dotIdx != -1:
+		prefix = col[:dotIdx]
+		col = col[dotIdx+1:]
+		tabPrefixIdx = tabs[0].find(' ' + prefix + ' ')
+		# if (col in )
+		print('pre', tabs[0][tabPrefixIdx+1])
 	for tab in tabs:
 		if (col in tables[tab]):
 			return (True, (tab, col))
@@ -66,7 +74,7 @@ def getCols(cols):
 	cols = cols.split(',')
 	for col in cols:
 		if (len(col) == 0):
-			return False, 'syntax error';
+			return (False, 'syntax error');
 	for i in range(0, len(cols)):
 		if (cols[i][0] == ' '):
 			cols[i] = cols[i][1:]
