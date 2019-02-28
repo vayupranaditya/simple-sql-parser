@@ -1,3 +1,6 @@
+import os
+os.system('cls')
+
 tables = {
 	'pegawai' : ['no_ktp', 'nama', 'tgl_lahir', 'gender', 'pendidikan'],
 	'dirawat' : ['tgl_dirawat', 'status', 'periode', 'pegawai_no_ktp', 'fasilitas_no_inventaris'],
@@ -6,11 +9,12 @@ tables = {
 
 queries = [
 	'select status from dirawat;',
-	'select no_ktp, nama, gender from pegawai;',
 	'select no_inventaris, nama, jenis from fasilitas;',
-	'select no_inventaris, nama, jenis from pegawai;',
-	'select no_inventaris, nama, jenis from ;',
+	'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
 	'select no_inventaris, nama, jenis from;',
+	'select no_inventaris, nama, jenis from dirawat;',
+	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
+	# 'select p.nama, f.nama from pegawai p join dirawat r using no_ktp join fasilitas f using no_inventaris;',
 ]
 
 def check(query, tables):
@@ -21,8 +25,8 @@ def check(query, tables):
 		cols = getCols(colTab[0])
 		tabs = getTabs(colTab[1])
 		if (False not in cols and False not in tabs):
-			print(cols)
-			print(tabs)
+			# print(cols)
+			# print(tabs)
 			print(checkExistance(cols, tabs, tables))
 		elif (False in cols):
 			print(cols)
@@ -34,15 +38,29 @@ def check(query, tables):
 def checkCol(col, tabs, tables):
 	for tab in tabs:
 		if (col in tables[tab]):
-			return True
-	return False
+			return (True, (tab, col))
+	return (False, 'column ' + col + 'is not found')
 
 def checkExistance(cols, tabs, tables):
+	pair = []
 	for col in cols:
-		if not checkCol(col, tabs, tables):
+		colExists = checkCol(col, tabs, tables)
+		# print('colExists', end=' ')
+		# print(colExists)
+		if colExists[0] == False:
 			return False, 'column ' + col + ' is not found.'
-	else:
-		return True
+		else:
+			pair.append(colExists[1])
+	return (True, groupByTable(pair))
+
+def groupByTable(pairs):
+	tabs = {}
+	for pair in pairs:
+		if pair[0] not in tabs:
+			tabs[pair[0]] = [pair[1]]
+		else:
+			tabs[pair[0]].append(pair[1])
+	return tabs
 
 def getCols(cols):
 	cols = cols.split(',')
@@ -67,5 +85,7 @@ def getTabs(tabs):
 	return tabs
 
 for query in queries:
+	print()
+	print(query)
 	check(query, tables)
 	print()
