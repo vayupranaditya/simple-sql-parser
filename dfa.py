@@ -24,14 +24,14 @@ queries = [
 # raw: raw substring
 # data: formatted substring if status == True | error status if status == False
 
-def base(query):
-	query = query.lower()
-	if (query[0:7] == 'select '):
-		# get columns. delimit using ' from '
-		cols = getCols(query)
-		if False not in cols:
-			if query.find(' from ') != -1:
-				# get tables (first table if using join). delimit using 'join' or ';'
+# def base(query):
+# 	query = query.lower()
+# 	if (query[0:7] == 'select '):
+# 		# get columns. delimit using ' from '
+# 		cols = getCols(query)
+# 		# if False not in cols:
+# 			# if query.find(' from ') != -1:
+# 				# get tables (first table if using join). delimit using 'join' or ';'
 # 				tabs = getTabs()
 # 				if False not in tabs:
 # 					if query.find(' join ') != -1:
@@ -41,6 +41,72 @@ def base(query):
 # 							# what to do
 # 						if query.find(';') != -1:
 # 							# what to do
+# 						else:
+# 							# what to do
+# 					else:
+# 						# no join
+# 				else:
+# 					return {
+# 						'status' : False,
+# 						'raw' : tabs['raw'],
+# 						'data' : tabs['data']
+# 					}
+# 			else:
+# 				return {
+# 					'status' : False,
+# 					'raw' : query,
+# 					'data' : 'syntax error'
+# 				}
+# 		else:
+# 			return {
+# 				'status' : False,
+# 				'raw' : cols['raw'],
+# 				'data' : cols['data']
+# 			}
+# 	else:
+# 		return {
+# 			'status' : False,
+# 			'raw' : query,
+# 			'data' : 'syntax error'
+# 		}
+
+
+
+def getTabs(query):
+	query = query[query.find(' from ')+len(' from '):]
+	if query.find(' join ') != -1:
+		query = query[:query.find(' join ')]
+		if (query.replace(' ','') == ''):
+			return {
+				'status' : False,
+				'raw' : query,
+				'data' : 'no table selected'
+			}
+		else:
+			tabs = query.split(',')
+			for i in range(0, len(tabs)):
+				if tabs[i][0] == ' ':
+					tabs[i] = tabs[i][1:]
+				if tabs[i][-1] == ' ':
+					tabs[i] = tabs[i][:-1]
+			return {
+				'status' : True,
+				'raw' : query,
+				'data' : tabs
+			}
+	else:
+		# not using join
+		tabs = query.split(',')
+		for i in range(0, len(tabs)):
+			if tabs[i][0] == ' ':
+				tabs[i] = tabs[i][1:]
+			if tabs[i][-1] == ' ':
+				tabs[i] = tabs[i][:-1]
+		return {
+			'status' : True,
+			'raw' : query,
+			'data' : tabs
+		}
 
 def getCols(query):
 	query = query[7:query.find(' from ')]
@@ -74,4 +140,12 @@ def getCols(query):
 		'data' : cols
 	}
 
-print(getCols('select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);'))
+
+
+
+for query in queries:
+	print()
+	print(query)
+	print(getCols(query))
+	print(getTabs(query))
+	print()
