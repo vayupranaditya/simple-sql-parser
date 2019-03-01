@@ -1,5 +1,7 @@
 import re
 import os
+import copy
+import json
 os.system('cls')
 
 tables = {
@@ -9,12 +11,12 @@ tables = {
 }
 
 queries = [
-	'select status from dirawat;',
-	'select no_inventaris, nama, jenis from fasilitas;',
-	'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
+	# 'select status from dirawat;',
+	# 'select no_inventaris, nama, jenis from fasilitas;',
+	# 'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
 	# 'select no_inventaris, nama, jenis from;',
-	'select no_inventaris, nama, jenis from dirawat;',
-	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
+	# 'select no_inventaris, nama, jenis from dirawat;',
+	# 'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
 	# 'select * from pegawai,fasilitas f g v;',
 	'select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);',
 ]
@@ -24,52 +26,6 @@ queries = [
 # raw: raw substring
 # data: formatted substring if status == True | error status if status == False
 
-# def base(query):
-# 	query = query.lower()
-# 	if (query[0:7] == 'select '):
-# 		# get columns. delimit using ' from '
-# 		cols = getCols(query)
-# 		# if False not in cols:
-# 			# if query.find(' from ') != -1:
-# 				# get tables (first table if using join). delimit using 'join' or ';'
-# 				tabs = getTabs()
-# 				if False not in tabs:
-# 					if query.find(' join ') != -1:
-# 						# get all join. getJoins may be recursive
-# 						joins = getJoins()
-# 						if False not in joins:
-# 							# what to do
-# 						if query.find(';') != -1:
-# 							# what to do
-# 						else:
-# 							# what to do
-# 					else:
-# 						# no join
-# 				else:
-# 					return {
-# 						'status' : False,
-# 						'raw' : tabs['raw'],
-# 						'data' : tabs['data']
-# 					}
-# 			else:
-# 				return {
-# 					'status' : False,
-# 					'raw' : query,
-# 					'data' : 'syntax error'
-# 				}
-# 		else:
-# 			return {
-# 				'status' : False,
-# 				'raw' : cols['raw'],
-# 				'data' : cols['data']
-# 			}
-# 	else:
-# 		return {
-# 			'status' : False,
-# 			'raw' : query,
-# 			'data' : 'syntax error'
-# 		}
-
 def base(query):
 	i = 0
 	join = []
@@ -78,20 +34,30 @@ def base(query):
 	if queries[i] == 'select':
 		cols = getCols(query)
 		if False not in cols:
-			print('COLS', cols)
+			# print('COLS', cols)
 			while queries[i] != 'from' and i < len(queries)-1:
 				i+=1
 			if queries[i] != queries[-1]:
 				tabs = getTabs(query)
 				if False not in tabs:
-					print('TABS', tabs)
+					# print('TABS', tabs)
 					qu = qu[qu.find(' join '):]
 					for q in queries:
 						if q == 'join':
 							qu = qu[qu.find(' join ')+1:]
 							# print(qu)
 							join.append(getJoin(qu))
-					print(join)
+					# print(join)
+					# print(tabs['data'])
+					join.append(tabs['data'])
+					return {
+						'status' : True,
+						'query' : query,
+						'data' : {
+							'cols' : cols['data'],
+							'tabs' : join
+						}
+					}
 
 def getJoin(query):
 	query = query[5:query.find(')')+1]
@@ -143,7 +109,7 @@ def getTabs(query):
 		else:
 			tabs = query.split(',')
 			for i in range(0, len(tabs)):
-				print(re.findall('. .+ ', tabs[i]))
+				# print(re.findall('. .+ ', tabs[i]))
 				if len(re.findall('. . . .', tabs[i])) > 1:
 					return {
 						'status' : False,
@@ -163,7 +129,7 @@ def getTabs(query):
 		# not using join
 		tabs = query.split(',')
 		for i in range(0, len(tabs)):
-			print(re.findall('. .', tabs[i]))
+			# print(re.findall('. .', tabs[i]))
 			if len(re.findall('. .', tabs[i])) > 1:
 				return {
 					'status' : False,
@@ -213,13 +179,13 @@ def getCols(query):
 	}
 
 
-
-
 for query in queries:
 	print()
 	print(query)
-	# print(getCols(query))
-	# print(getTabs(query))
-	# print(getJoin(query))
-	print(base(query))
+	data = base(query)
+	print(data)
+	print()
+	print(data['data']['cols'])
+	print()
+	print(data['data']['tabs'])
 	print()
