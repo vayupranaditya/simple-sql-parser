@@ -15,7 +15,7 @@ queries = [
 	'select no_inventaris, nama, jenis from;',
 	'select no_inventaris, nama, jenis from dirawat;',
 	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
-	'select * from pegawai,fasilitas;',
+	'select * from pegawai,fasilitas f g v;',
 	'select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);',
 ]
 
@@ -70,6 +70,17 @@ queries = [
 # 			'data' : 'syntax error'
 # 		}
 
+# def getJoin(query):
+# 	query = query[query.find(' join ')+len(' join '):query.find(')')+1]
+# 	queries = query.split(' using ')
+# 	if len(re.findall('. .', queries[0])) != 1:
+# 		return {
+# 			'status' : False,
+# 			'raw' : query,
+# 			'data' : 'table syntax error'
+# 		}
+# 	else:
+
 
 
 def getTabs(query):
@@ -85,6 +96,13 @@ def getTabs(query):
 		else:
 			tabs = query.split(',')
 			for i in range(0, len(tabs)):
+				print(re.findall('. .+ ', tabs[i]))
+				if len(re.findall('. . . .', tabs[i])) > 1:
+					return {
+						'status' : False,
+						'raw' : query,
+						'data' : 'table syntax error'
+					}
 				if tabs[i][0] == ' ':
 					tabs[i] = tabs[i][1:]
 				if tabs[i][-1] == ' ':
@@ -98,6 +116,13 @@ def getTabs(query):
 		# not using join
 		tabs = query.split(',')
 		for i in range(0, len(tabs)):
+			print(re.findall('. .', tabs[i]))
+			if len(re.findall('. .', tabs[i])) > 1:
+				return {
+					'status' : False,
+					'raw' : query,
+					'data' : 'table syntax error'
+				}
 			if tabs[i][0] == ' ':
 				tabs[i] = tabs[i][1:]
 			if tabs[i][-1] == ' ':
@@ -148,4 +173,5 @@ for query in queries:
 	print(query)
 	print(getCols(query))
 	print(getTabs(query))
+	# print(getJoin(query))
 	print()
