@@ -12,10 +12,10 @@ queries = [
 	'select status from dirawat;',
 	'select no_inventaris, nama, jenis from fasilitas;',
 	'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
-	'select no_inventaris, nama, jenis from;',
+	# 'select no_inventaris, nama, jenis from;',
 	'select no_inventaris, nama, jenis from dirawat;',
 	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
-	'select * from pegawai,fasilitas f g v;',
+	# 'select * from pegawai,fasilitas f g v;',
 	'select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);',
 ]
 
@@ -70,16 +70,63 @@ queries = [
 # 			'data' : 'syntax error'
 # 		}
 
-# def getJoin(query):
-# 	query = query[query.find(' join ')+len(' join '):query.find(')')+1]
-# 	queries = query.split(' using ')
-# 	if len(re.findall('. .', queries[0])) != 1:
-# 		return {
-# 			'status' : False,
-# 			'raw' : query,
-# 			'data' : 'table syntax error'
-# 		}
-# 	else:
+def base(query):
+	i = 0
+	join = []
+	qu = query
+	queries = query.split(' ')
+	if queries[i] == 'select':
+		cols = getCols(query)
+		if False not in cols:
+			print('COLS', cols)
+			while queries[i] != 'from' and i < len(queries)-1:
+				i+=1
+			if queries[i] != queries[-1]:
+				tabs = getTabs(query)
+				if False not in tabs:
+					print('TABS', tabs)
+					qu = qu[qu.find(' join '):]
+					for q in queries:
+						if q == 'join':
+							qu = qu[qu.find(' join ')+1:]
+							# print(qu)
+							join.append(getJoin(qu))
+					print(join)
+
+def getJoin(query):
+	query = query[5:query.find(')')+1]
+	queries = query.split(' using ')
+	if len(re.findall('. .', queries[0])) != 1:
+		return {
+			'status' : False,
+			'raw' : query,
+			'data' : 'table syntax error'
+		}
+	else:
+		tabs = queries[0].split(' ')
+		tab = tabs[0]
+		if len(tabs) > 1:
+			identifier = tabs[1]
+			return {
+				'status' : True,
+				'raw' : query,
+				'data' : {
+					'join' : {
+						'identifier' : identifier,
+						'table' : tab,
+						'key' : queries[1][1:-1]
+					}
+				}
+			}
+		else:
+			return {
+				'status' : True,
+				'raw' : query,
+				'data' : {
+					'table' : tab,
+					'key' : queries[1][1:-1]
+				}
+			}
 
 
 
@@ -110,7 +157,7 @@ def getTabs(query):
 			return {
 				'status' : True,
 				'raw' : query,
-				'data' : tabs
+				'data' : {'join' : tabs}
 			}
 	else:
 		# not using join
@@ -171,7 +218,8 @@ def getCols(query):
 for query in queries:
 	print()
 	print(query)
-	print(getCols(query))
-	print(getTabs(query))
+	# print(getCols(query))
+	# print(getTabs(query))
 	# print(getJoin(query))
+	print(base(query))
 	print()
