@@ -11,9 +11,9 @@ tables = {
 }
 
 queries = [
-	# 'select status from dirawat;',
-	# 'select no_inventaris, nama, jenis from fasilitas;',
-	# 'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
+	'select status from dirawat;',
+	'select no_inventaris, nama, jenis from fasilitas;',
+	'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
 	# 'select no_inventaris, nama, jenis from;',
 	# 'select no_inventaris, nama, jenis from dirawat;',
 	# 'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
@@ -46,13 +46,19 @@ def base(query):
 						if q == 'join':
 							qu = qu[qu.find(' join ')+1:]
 							# print(qu)
-							join.append(getJoin(qu))
+							joinData = getJoin(qu)
+							if False not in joinData:
+								join.append(joinData['data'])
 					# print(join)
 					# print(tabs['data'])
-					join.append(tabs['data'])
+					join.append({
+						'status' : True,
+						'raw' :tabs['raw'],
+						'data' : tabs['data'],
+					})
 					return {
 						'status' : True,
-						'query' : query,
+						'raw' : query,
 						'data' : {
 							'cols' : cols['data'],
 							'tabs' : join
@@ -178,14 +184,77 @@ def getCols(query):
 		'data' : cols
 	}
 
+def getColTab(cols, tabs, allTabs):
+	pair = []
+	for col in cols:
+		if '.' in col:
+			colTab = checkColTab(col, tabs, allTabs)
+		else:
+			colTab = checkColTabs(col, tabs, allTabs)
+		if False not in colTab:
+			pair.append(colTab['data'])
+		else:
+			return False
+	return pair
+			
+def checkColTab(col, tabs, allTabs):
+	cs = col.split('.')
+	if cs[1] in allTabs[tabs[cs[0]]['table']]:
+		return {
+			'status' : True,
+			'data' : (col, tabs[cs[0]]['table'])
+		}
+	else: {
+		'status' : False,
+		'data' : 'column ' + col + 'not found'
+	}
+
+def checkColTabs(col, tabs, allTabs):
+	print('TAB', tabs)
+	for tab in tabs:
+		if col in allTabs[tab['table']]:
+			return {
+				'status' : True,
+				'data' : (col, tab['table'])
+			}
+	return {
+		'status' : False,
+		'data' : 'column ' + col + 'not found'
+	}
+
+def parseTabs(tabs):
+	ts = {}
+	for tab in tabs:
+		if 'join' in tab:
+			# ts.append({tab['join']['identifier'] : tab['join']})
+			ts[tab['join']['identifier']] = tab['join']
+		else:
+			if 'join' in tab['data']:
+				t = tab['data']['join'][0].split(' ')
+			else:
+				t = tab['data'][0]
+			if len(t) > 1:
+				ts[t[1]] = {
+					'identifier' : t[0],
+					'table' : t[0],
+					'key' : ''
+				}
+			else:
+				ts[t[0]] = {
+					'identifier' : t[0],
+					'table' : t[0],
+					'key' : ''
+				}
+	return ts
 
 for query in queries:
 	print()
 	print(query)
 	data = base(query)
-	print(data)
-	print()
-	print(data['data']['cols'])
-	print()
-	print(data['data']['tabs'])
+	# print(data)
+	# print(data['data']['cols'])
+	tabs = parseTabs(data['data']['tabs'])
+	print('COLTAB', getColTab(data['data']['cols'], tabs, tables))
+	# print(json.dumps(data['data']['tabs']))
+	# print(json.dumps(tabs))
 	print()

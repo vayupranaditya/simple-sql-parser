@@ -1,0 +1,3 @@
+Pegawai;no_ktp;nama;tgl_lahir;gender;pendidikan#
+Dirawat;tgl_dirawat;status;periode;pegawai_no_ktp;fasilitas;no_inventaris#
+Fasilitas;no_inventaris;nama;jenis;tgl_dibeli;pemakaian#

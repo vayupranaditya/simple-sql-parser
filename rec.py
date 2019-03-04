@@ -1,22 +1,50 @@
+# python 3.6
+
+# IF-41-07
+# I Gusti Bagus Vayupranaditya Putraadinatha 1301174029
+# Angela Marpaung 1301174111
+# Beladina Elfitri 1301174046
+# Shindy Trimaria Laxmi 1301170092
+import json
+import re
 import os
 os.system('cls')
+print("""IF-41-07
+I Gusti Bagus Vayupranaditya Putraadinatha 1301174029
+Angela Marpaung 1301174111
+Beladina Elfitri 1301174046
+Shindy Trimaria Laxmi 1301170092
+""")
 
-tables = {
-	'pegawai' : ['no_ktp', 'nama', 'tgl_lahir', 'gender', 'pendidikan'],
-	'dirawat' : ['tgl_dirawat', 'status', 'periode', 'pegawai_no_ktp', 'fasilitas_no_inventaris'],
-	'fasilitas' : ['no_inventaris', 'nama', 'jenis', 'tgl_dibeli', 'pemakaian']
-}
+filename = 'data_dictionary.txt'
+file = open(filename, 'r')
+fileContent = file.read()
+fileContent = fileContent.lower()
+fileContent = re.sub('\n', '', fileContent)
+ts = fileContent.split('#')
+tables = {}
+for t in ts:
+	c = t.split(';')
+	tables[c[0]] = c[1:]
+# print(tables)
 
-queries = [
-	'select status from dirawat;',
-	'select no_inventaris, nama, jenis from fasilitas;',
-	'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
-	'select no_inventaris, nama, jenis from;',
-	'select no_inventaris, nama, jenis from dirawat;',
-	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
-	'select * from pegawai,fasilitas;',
-	'select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);',
-]
+# print(json.dumps(tables))
+# tables = {
+# 	'pegawai' : ['no_ktp', 'nama', 'tgl_lahir', 'gender', 'pendidikan'],
+# 	'dirawat' : ['tgl_dirawat', 'status', 'periode', 'pegawai_no_ktp', 'fasilitas_no_inventaris'],
+# 	'fasilitas' : ['no_inventaris', 'nama', 'jenis', 'tgl_dibeli', 'pemakaian']
+# }
+
+# queries = [
+# 	'select status from dirawat;',
+# 	'select no_inventaris, nama, jenis from fasilitas;',
+# 	'select no_inventaris, tgl_lahir, jenis from pegawai, fasilitas;',
+# 	'select no_inventaris, nama, jenis from;',
+# 	'select no_inventaris, nama, jenis from dirawat;',
+# 	'select no_inventaris,tgl_lahir,jenis from pegawai,fasilitas;',
+# 	'select * from pegawai,fasilitas;',
+# 	'select p.nama, f.nama from pegawai p join dirawat r using (no_ktp) join fasilitas f using (no_inventaris);',
+# ]
 
 def check(query, tables):
 	query = query.lower()
@@ -43,10 +71,12 @@ def checkCol(col, tabs, tables):
 		col = col[dotIdx+1:]
 		tabPrefixIdx = tabs[0].find(' ' + prefix + ' ')
 		# if (col in )
-		print('pre', tabs[0][tabPrefixIdx+1])
+		# print('pre', tabs[0][tabPrefixIdx+1])
 	for tab in tabs:
-		if (col in tables[tab]):
+		if col in tables[tab]:
 			return (True, (tab, col))
+		elif col == '*':
+			return (True, (tab, tables[tab]))
 	return (False, 'column ' + col + 'is not found')
 
 def checkExistance(cols, tabs, tables):
@@ -92,8 +122,10 @@ def getTabs(tabs):
 	# tables got
 	return tabs
 
-for query in queries:
-	print()
-	print(query)
-	check(query, tables)
-	print()
+# for query in queries:
+# 	print()
+# 	print(query)
+# 	check(query, tables)
+# 	print()
+query = input('>')
+check(query, tables)
